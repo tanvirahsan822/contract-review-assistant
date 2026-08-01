@@ -1,8 +1,8 @@
 # Docket — Contract Review Assistant
 
-A small, safe AI-assisted contract review prototype built for the Intra IUB Hackathon (Final Round).
+A small, safe AI-assisted contract review prototype built .
 
-**Live demo:** _add your deployed link here after publishing (see Deployment below)_
+**Live demo:** _add your deployed link here after publishing ()_
 
 ## What it does
 
@@ -69,8 +69,7 @@ git add .
 git commit -m "Contract review assistant prototype"
 git push -u origin main
 ```
-
-## Presentation notes (for judges' Q&A)
+ (qna)
 
 - **How the system finds the correct clause:** sentence-level keyword triggers per clause type (e.g. "invoice"/"paid" for Payment, "terminat" for Termination, "renew" for Automatic Renewal). The matched sentence is quoted verbatim as evidence.
 - **How it compares clause vs. standard:** extracts the numeric term (days) from the matched sentence via regex and checks it against a fixed threshold from the company standard for that clause type.

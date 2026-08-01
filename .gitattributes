@@ -1,2 +1,5 @@
-# Auto detect text files and perform LF normalization
+# Auto detec__pycache__/
+*.pyc
+.venv/
+.streamlit/secrets.tomlt text files and perform LF normalization
 * text=auto

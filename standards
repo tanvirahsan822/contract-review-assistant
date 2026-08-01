@@ -1,0 +1,40 @@
+{
+  "payment": {
+    "label": "Payment",
+    "standard_text": "Payment must be made within 30 days of invoice date.",
+    "source": "Company Standards \u00a71 - Payment Terms",
+    "rule": "max_days",
+    "threshold": 30,
+    "direction": "lower_is_better"
+  },
+  "termination": {
+    "label": "Termination",
+    "standard_text": "Either party may terminate the agreement with at least 30 days written notice.",
+    "source": "Company Standards \u00a72 - Termination",
+    "rule": "min_notice_days",
+    "threshold": 30,
+    "direction": "higher_is_better"
+  },
+  "automatic_renewal": {
+    "label": "Automatic Renewal",
+    "standard_text": "Automatic renewal should require at least 30 days' notice to cancel before the term ends.",
+    "source": "Company Standards \u00a73 - Automatic Renewal",
+    "rule": "min_notice_days",
+    "threshold": 30,
+    "direction": "lower_is_better_for_customer"
+  },
+  "confidentiality": {
+    "label": "Confidentiality",
+    "standard_text": "Confidentiality obligations must survive termination for at least 2 years.",
+    "source": "Company Standards \u00a74 - Confidentiality",
+    "rule": "min_years",
+    "threshold": 2,
+    "direction": "higher_is_better"
+  },
+  "data_protection": {
+    "label": "Data Protection",
+    "standard_text": "Vendor must notify the company of any data breach within 72 hours of discovery.",
+    "source": "Company Standards \u00a75 - Data Protection",
+    "rule": "max_hours",
+    "threshold": 72,
+    "direction": "lower_is_better"

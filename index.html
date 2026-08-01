@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docket — Contract Review Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2430;
+    --ink-soft:#2E3947;
+    --paper:#F6F4EE;
+    --paper-raised:#FFFFFF;
+    --line:#DAD4C4;
+    --slate:#5B6472;
+    --brass:#9C7A2E;
+    --brass-soft:#F1E7CC;
+    --risk-low:#2F6B4F;
+    --risk-low-bg:#E7F1EA;
+    --risk-med:#A15A11;
+    --risk-med-bg:#F6E9D8;
+    --risk-high:#A32B2B;
+    --risk-high-bg:#F7E2E0;
+    --risk-none:#4A5568;
+    --risk-none-bg:#E9E8E3;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:0 28px 80px;}
+
+  /* Header */
+  header.top{
+    border-bottom:1px solid var(--line);
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .top-inner{
+    max-width:1180px;margin:0 auto;padding:22px 28px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:34px;height:34px;border:1.5px solid var(--brass);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Source Serif 4',serif;font-weight:700;font-size:16px;
+    color:var(--brass);flex-shrink:0;
+  }
+  .brand-text h1{
+    font-family:'Source Serif 4',serif;font-size:19px;margin:0;font-weight:600;letter-spacing:0.2px;
+  }
+  .brand-text p{margin:1px 0 0;font-size:11.5px;color:#B9C0CC;letter-spacing:0.4px;text-transform:uppercase;}
+  .disclaimer-pill{
+    font-size:11.5px;color:#DCC98A;border:1px solid #5A5033;
+    padding:6px 12px;letter-spacing:0.3px;font-family:'IBM Plex Mono',monospace;
+  }
+
+  /* Case selector bar */
+  .case-bar{
+    margin-top:26px;padding:18px 22px;background:var(--paper-raised);
+    border:1px solid var(--line);display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  }
+  .case-bar label{font-size:12px;text-transform:uppercase;letter-spacing:0.6px;color:var(--slate);font-weight:600;}
+  select{
+    font-family:'Inter',sans-serif;font-size:14.5px;padding:9px 12px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    min-width:280px;
+  }
+  .meta-line{font-size:12.5px;color:var(--slate);font-family:'IBM Plex Mono',monospace;}
+
+  /* Layout */
+  .grid{display:grid;grid-template-columns:300px 1fr;gap:22px;margin-top:22px;}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;}}
+
+  .clause-list{display:flex;flex-direction:column;gap:10px;}
+  .clause-card{
+    background:var(--paper-raised);border:1px solid var(--line);
+    padding:14px 16px;cursor:pointer;transition:border-color .15s ease;
+  }
+  .clause-card:hover{border-color:var(--brass);}
+  .clause-card.active{border-color:var(--brass);border-width:1.5px;background:var(--brass-soft);}
+  .clause-card .num{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--slate);}
+  .clause-card h3{margin:4px 0 8px;font-size:15px;font-family:'Source Serif 4',serif;font-weight:600;}
+  .badge{
+    display:inline-block;font-size:11px;font-weight:600;letter-spacing:0.3px;
+    padding:3px 9px;text-transform:uppercase;font-family:'Inter',sans-serif;
+  }
+  .badge.low{color:var(--risk-low);background:var(--risk-low-bg);}
+  .badge.medium{color:var(--risk-med);background:var(--risk-med-bg);}
+  .badge.high{color:var(--risk-high);background:var(--risk-high-bg);}
+  .badge.none{color:var(--risk-none);background:var(--risk-none-bg);}
+
+  /* Detail panel */
+  .panel{background:var(--paper-raised);border:1px solid var(--line);padding:28px 30px;}
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:22px;}
+  .panel-head h2{font-family:'Source Serif 4',serif;font-size:24px;margin:0 0 6px;font-weight:600;}
+  .panel-head .sub{font-size:12.5px;color:var(--slate);font-family:'IBM Plex Mono',monospace;}
+  .risk-seal{text-align:right;flex-shrink:0;}
+  .risk-seal .label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.6px;color:var(--slate);margin-bottom:4px;}
+  .risk-seal .badge{font-size:13px;padding:6px 14px;}
+
+  .field{margin-bottom:20px;}
+  .field .flabel{
+    font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--brass);
+    font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;
+  }
+  .field .flabel::after{content:"";flex:1;height:1px;background:var(--line);}
+  .evidence-block{
+    background:var(--paper);border-left:3px solid var(--brass);
+    padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;
+    line-height:1.6;color:var(--ink-soft);
+  }
+  .standard-block{
+    background:var(--paper);border-left:3px solid var(--slate);
+    padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;
+    line-height:1.6;color:var(--ink-soft);
+  }
+  .source-tag{font-size:11.5px;color:var(--slate);margin-top:8px;font-style:italic;}
+  .reason-text{font-size:14.5px;line-height:1.65;color:var(--ink-soft);}
+  .not-enough{
+    padding:16px 18px;background:var(--risk-none-bg);border-left:3px solid var(--risk-none);
+    font-size:14.5px;color:var(--ink-soft);
+  }
+
+  /* Human review */
+  .review-box{
+    margin-top:26px;padding-top:22px;border-top:1px solid var(--line);
+  }
+  .review-box .flabel{font-size:11px;text-transform:uppercase;letter-spacing:0.6px;color:var(--brass);font-weight:700;margin-bottom:12px;}
+  .review-status{font-size:13.5px;margin-bottom:14px;font-family:'IBM Plex Mono',monospace;}
+  .review-status span{font-weight:600;}
+  .btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  button.act{
+    font-family:'Inter',sans-serif;font-size:13px;font-weight:600;padding:9px 16px;
+    border:1px solid var(--ink);background:var(--paper-raised);color:var(--ink);cursor:pointer;
+    letter-spacing:0.2px;
+  }
+  button.act:hover{background:var(--ink);color:var(--paper);}
+  button.act.primary{background:var(--ink);color:var(--paper);}
+  button.act.primary:hover{background:var(--ink-soft);}
+  textarea{
+    width:100%;font-family:'Inter',sans-serif;font-size:13.5px;padding:10px 12px;
+    border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    resize:vertical;min-height:60px;
+  }
+
+  footer{margin-top:40px;padding-top:20px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--slate);text-align:center;}
+  footer a{color:var(--brass);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <div class="brand-mark">D</div>
+      <div class="brand-text">
+        <h1>Docket</h1>
+        <p>Contract Review Assistant</p>
+      </div>
+    </div>
+    <div class="disclaimer-pill">Assistive tool — not legal advice — human review required</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="case-bar">
+    <label for="contractSelect">Select contract</label>
+    <select id="contractSelect"></select>
+    <div class="meta-line" id="contractMeta"></div>
+  </div>
+
+  <div class="grid">
+    <div class="clause-list" id="clauseList"></div>
+    <div class="panel" id="detailPanel"></div>
+  </div>
+
+  <footer>
+    Built for the Intra IUB Hackathon — Final Round · Prototype only, does not constitute legal advice.
+  </footer>
+</div>
+
+<script>
+/* ---------------------------------------------------------
+   1. COMPANY STANDARDS (approved ground truth — never invented)
+--------------------------------------------------------- */
+const COMPANY_STANDARDS = {
+  "Payment": {
+    summary: "Invoices must be paid within 30 days.",
+    text: "Vendor invoices shall be paid within thirty (30) calendar days of the invoice date. Late payments beyond 30 days require prior written approval from Finance.",
+    source: "Company Payment Policy, Section 2.1",
+    maxDays: 30,
+    directionLabel: "payment window"
+  },
+  "Termination": {
+    summary: "Either party may terminate with at least 30 days' written notice.",
+    text: "Either party may terminate this agreement by providing at least thirty (30) days' written notice. Immediate termination is only permitted in cases of material breach.",
+    source: "Company Contract Standards, Section 4.3",
+    minDays: 30,
+    directionLabel: "termination notice"
+  },
+  "Automatic Renewal": {
+    summary: "Cancellation notice for auto-renewal must not exceed 30 days.",
+    text: "If a contract includes an automatic renewal clause, cancellation notice must be no more than thirty (30) days before the renewal date. Notice periods longer than 30 days are not acceptable.",
+    source: "Company Contract Standards, Section 5.2",
+    maxDays: 30,
+    directionLabel: "renewal cancellation notice"
+  }
+};
+
+/* ---------------------------------------------------------
+   2. KEYWORD TRIGGERS used to LOCATE candidate sentences.
+      The system only ever echoes back real sentences from the
+      contract text — it never generates new clause language.
+--------------------------------------------------------- */
+const KEYWORDS = {
+  "Payment": ["invoice", "paid", "payment"],
+  "Termination": ["terminat"],
+  "Automatic Renewal": ["renew"]
+};
+
+/* ---------------------------------------------------------
+   3. SAMPLE CONTRACTS (provided test data)
+--------------------------------------------------------- */
+const CONTRACTS = {
+  "acme": {
+    name: "Acme Vendor Services Agreement",
+    meta: "Vendor Agreement · 3 pages · provided sample",
+    text: `This Vendor Services Agreement is entered into between the Company and Acme Supplies Ltd.
+Section 3 — Payment. All invoices submitted by the Vendor shall be paid by the Company within forty-five (45) days of the invoice date.
+Section 7 — Automatic Renewal. The agreement will automatically renew for another year unless cancelled sixty (60) days before the end date.
+Section 9 — Confidentiality. Both parties agree to keep proprietary information confidential during and after the term of this agreement.`
+  },
+  "bright": {
+    name: "Bright Solutions Master Services Agreement",
+    meta: "MSA · 4 pages · provided sample",
+    text: `This Master Services Agreement is entered into between the Company and Bright Solutions Inc.
+Section 2 — Payment Terms. Invoices shall be paid within thirty (30) days of receipt.
+Section 5 — Termination. Either party may terminate this agreement upon thirty (30) days' written notice to the other party.
+Section 6 — Automatic Renewal. This agreement shall automatically renew annually unless either party provides notice of cancellation at least fifteen (15) days before the renewal date.`
+  }
+};
+
+/* ---------------------------------------------------------
+   4. CLAUSE FINDER — sentence-level keyword match.
+      Returns the exact sentence, or null if not found.
+--------------------------------------------------------- */
+function findClauseSentence(contractText, clauseType) {
+  const sentences = contractText
+    .split(/\n+/)
+    .flatMap(line => line.split(/(?<=[.])\s+/))
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const triggers = KEYWORDS[clauseType];
+  for (const s of sentences) {
+    const lower = s.toLowerCase();
+    if (triggers.some(k => lower.includes(k))) {
+      return s;
+    }
+  }
+  return null;
+}
+
+/* ---------------------------------------------------------
+   5. COMPARE clause vs standard → risk level + reason.
+      Pure rule-based — no fabricated legal reasoning.
+--------------------------------------------------------- */
+function extractDays(sentence) {
+  const m = sentence.match(/(\d+)\s*\)?\s*(day|calendar day)/i);
+  if (m) return parseInt(m[1], 10);
+  // also catch spelled-out common cases
+  const words = {thirty:30, forty:40, "forty-five":45, sixty:60, fifteen:15, ninety:90};
+  for (const w in words) {
+    if (sentence.toLowerCase().includes(w)) return words[w];
+  }
+  return null;
+}
+
+function assess(clauseType, sentence) {
+  const std = COMPANY_STANDARDS[clauseType];
+  if (!sentence) {
+    return {
+      risk: "none",
+      reason: "Not enough information to make a reliable assessment.",
+      days: null
+    };
+  }
+  const days = extractDays(sentence);
+  if (days === null) {
+    return {
+      risk: "none",
+      reason: "Not enough information to make a reliable assessment. A relevant clause was found, but no numeric term could be reliably extracted.",
+      days: null
+    };
+  }
+
+  if (clauseType === "Payment") {
+    if (days > std.maxDays) {
+      return {risk:"high", reason:`The contract allows ${days} days for payment, which exceeds the company standard of ${std.maxDays} days.`, days};
+    }
+    return {risk:"low", reason:`The contract's ${days}-day payment window is within the company standard of ${std.maxDays} days.`, days};
+  }
+
+  if (clauseType === "Termination") {
+    if (days < std.minDays) {
+      return {risk:"medium", reason:`The contract requires only ${days} days' notice to terminate, which is shorter than the company standard of ${std.minDays} days.`, days};
+    }
+    return {risk:"low", reason:`The contract's ${days}-day termination notice meets the company standard of at least ${std.minDays} days.`, days};
+  }
+
+  if (clauseType === "Automatic Renewal") {
+    if (days > std.maxDays) {
+      return {risk:"high", reason:`The contract requires ${days} days' notice, which is longer than the company standard of ${std.maxDays} days.`, days};
+    }
+    return {risk:"low", reason:`The contract's ${days}-day cancellation notice is within the company standard of ${std.maxDays} days.`, days};
+  }
+}
+
+/* ---------------------------------------------------------
+   6. STATE + RENDER
+--------------------------------------------------------- */
+const CLAUSE_TYPES = ["Payment", "Termination", "Automatic Renewal"];
+let currentContractKey = "acme";
+let currentClauseIndex = 0;
+let reviewState = {}; // per clause: {status, feedback}
+
+function resetReviewState() {
+  reviewState = {};
+  CLAUSE_TYPES.forEach(c => reviewState[c] = {status: "Pending Review", feedback: ""});
+}
+resetReviewState();
+
+function riskLabel(r) {
+  return {low:"Low Risk", medium:"Medium Risk", high:"High Risk", none:"Not Enough Information"}[r];
+}
+
+function renderContractSelector() {
+  const sel = document.getElementById("contractSelect");
+  sel.innerHTML = "";
+  Object.entries(CONTRACTS).forEach(([key, c]) => {
+    const opt = document.createElement("option");
+    opt.value = key; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  sel.value = currentContractKey;
+  sel.onchange = () => {
+    currentContractKey = sel.value;
+    currentClauseIndex = 0;
+    resetReviewState();
+    renderAll();
+  };
+}
+
+function renderClauseList() {
+  const list = document.getElementById("clauseList");
+  list.innerHTML = "";
+  const contract = CONTRACTS[currentContractKey];
+  document.getElementById("contractMeta").textContent = contract.meta;
+
+  CLAUSE_TYPES.forEach((clauseType, i) => {
+    const sentence = findClauseSentence(contract.text, clauseType);
+    const result = assess(clauseType, sentence);
+    const card = document.createElement("div");
+    card.className = "clause-card" + (i === currentClauseIndex ? " active" : "");
+    card.innerHTML = `
+      <div class="num">CLAUSE ${String(i+1).padStart(2,"0")}</div>
+      <h3>${clauseType}</h3>
+      <span class="badge ${result.risk}">${riskLabel(result.risk)}</span>
+    `;
+    card.onclick = () => { currentClauseIndex = i; renderAll(); };
+    list.appendChild(card);
+  });
+}
+
+function renderDetail() {
+  const contract = CONTRACTS[currentContractKey];
+  const clauseType = CLAUSE_TYPES[currentClauseIndex];
+  const sentence = findClauseSentence(contract.text, clauseType);
+  const result = assess(clauseType, sentence);
+  const std = COMPANY_STANDARDS[clauseType];
+  const panel = document.getElementById("detailPanel");
+
+  let evidenceHtml;
+  if (sentence) {
+    evidenceHtml = `
+      <div class="field">
+        <div class="flabel">Contract Clause</div>
+        <div class="evidence-block">"${sentence}"</div>
+        <div class="source-tag">Source: ${contract.name}</div>
+      </div>
+      <div class="field">
+        <div class="flabel">Company Standard</div>
+        <div class="standard-block">${std.text}</div>
+        <div class="source-tag">Source: ${std.source}</div>
+      </div>
+      <div class="field">
+        <div class="flabel">Reason</div>
+        <div class="reason-text">${result.reason}</div>
+      </div>
+    `;
+  } else {
+    evidenceHtml = `
+      <div class="field">
+        <div class="flabel">Contract Clause</div>
+        <div class="not-enough">No sentence referencing "${clauseType.toLowerCase()}" was found in the contract text.</div>
+      </div>
+      <div class="field">
+        <div class="flabel">Result</div>
+        <div class="not-enough">${result.reason}</div>
+      </div>
+    `;
+  }
+
+  const rs = reviewState[clauseType];
+
+  panel.innerHTML = `
+    <div class="panel-head">
+      <div>
+        <h2>${clauseType}</h2>
+        <div class="sub">${contract.name}</div>
+      </div>
+      <div class="risk-seal">
+        <div class="label">Risk Level</div>
+        <span class="badge ${result.risk}">${riskLabel(result.risk)}</span>
+      </div>
+    </div>
+    ${evidenceHtml}
+    <div class="review-box">
+      <div class="flabel">Human Review Required</div>
+      <div class="review-status">Status: <span>${rs.status}</span></div>
+      <div class="btn-row">
+        <button class="act primary" data-action="Approve">Approve</button>
+        <button class="act" data-action="Reject">Reject</button>
+        <button class="act" data-action="Mark for review">Mark for Review</button>
+      </div>
+      <textarea id="feedbackInput" placeholder="Add reviewer feedback (optional)">${rs.feedback}</textarea>
+    </div>
+  `;
+
+  panel.querySelectorAll("button.act").forEach(btn => {
+    btn.onclick = () => {
+      reviewState[clauseType].status = btn.dataset.action === "Approve" ? "Approved"
+        : btn.dataset.action === "Reject" ? "Rejected" : "Marked for Review";
+      renderDetail();
+    };
+  });
+  document.getElementById("feedbackInput").oninput = (e) => {
+    reviewState[clauseType].feedback = e.target.value;
+  };
+}
+
+function renderAll() {
+  renderClauseList();
+  renderDetail();
+}
+
+renderContractSelector();
+renderAll();
+</script>
+</body>
+</html>

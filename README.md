@@ -2,7 +2,7 @@
 
 A small, safe AI-assisted contract review prototype built .
 
-**Live demo:** _add your deployed link here after publishing ()_
+**Live demo:** (file:///C:/Users/Asus%20VivoBook/Downloads/contract-review-assistant%20(1)/contract-review-assistant/index.html)_
 
 ## What it does
 
